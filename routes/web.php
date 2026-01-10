@@ -7,6 +7,7 @@ use App\Models\FeederCacheProfilPt;
 use App\Models\FeederCacheProdi;
 use App\Models\FeederSyncRun;
 use App\Models\FeederStatsSnapshot;
+use App\Http\Controllers\ImportController;
 
 
 Route::get('/', function () {
@@ -21,25 +22,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-Route::middleware(['auth'])->group(function () {
+    
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     Route::view('/imports', 'imports.index')->name('imports.index');
     Route::view('/sync-logs', 'sync.logs')->name('sync.logs');
     Route::view('/settings/feeder', 'settings.feeder')->name('settings.feeder');
-});
-
-Route::middleware(['auth'])->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     Route::get('/settings/feeder', [FeederSettingsController::class, 'edit'])
         ->name('settings.feeder');
 
     Route::post('/settings/feeder', [FeederSettingsController::class, 'upsert'])
         ->name('settings.feeder.save');
+
+    //imports
+    Route::get('/imports', [ImportController::class, 'index'])->name('imports.index');
+    Route::get('/imports/create', [ImportController::class, 'create'])->name('imports.create');
+    Route::post('/imports', [ImportController::class, 'store'])->name('imports.store');
+    Route::get('/imports/{batch}', [ImportController::class, 'show'])->name('imports.show');
+
+    Route::get('/imports/template/{module}', [ImportController::class, 'downloadTemplate'])
+        ->name('imports.template');
 });
+
 
 Route::post('/settings/feeder/refresh', [\App\Http\Controllers\FeederSettingsController::class, 'refreshCache'])
     ->name('settings.feeder.refresh');
